@@ -1,0 +1,21 @@
+<html>
+
+<h1>{{titel}} - {{seizoen.seizoen}}</h1>
+
+<h2>Organisatoren</h2>
+
+<ul>{{#organiteiten}}
+  <li>{{#.}}
+    <a href="{{id}}">{{naam}}</a> ({{functie}})
+  {{/.}}</li>
+{{/organiteiten}}</ul>
+
+<h2>Voorstellingen</h2>
+
+<ul>{{#shows}}
+  <li>{{#.}}
+    {{datum}}, {{ruimte}}, {{locatie}}
+  {{/.}}</li>
+{{/shows}}</ul>
+
+</html>

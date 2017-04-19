@@ -1,0 +1,14 @@
+<html>
+<h1>{{titel}}, {{beginjaar}}</h1>
+
+<h2>Kunstenaars</h2>
+
+<ul>{{#artiesten}}<li>{{.}}</li>{{/artiesten}}</ul></p>
+
+<h2>Informatie over tentoonstelling</h2>
+
+<p>Type van tentoonstelling: <ul>{{#production_types}}<li>{{.}}</li>{{/production_types}}</ul></p>
+
+<p>Tentoonstellingsruimte: <ul>{{#ruimtes}}<li>{{.}}</li>{{/ruimtes}}</ul>
+
+<p>Plaatsen: <ul>{{#locaties}}{{.}}{{/locaties}}</ul></p>

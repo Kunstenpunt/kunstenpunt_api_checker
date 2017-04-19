@@ -1,0 +1,13 @@
+<html>
+
+<h1>Overzicht van buitenlandse concerten</h1>
+
+<ul>{{#.}}
+
+  <li>{{#.}}
+    <a href="{{id}}">{{title}}</a>, {{venue}}, {{locatie}}</li>
+  {{/.}}</li>
+
+{{/.}}</ul>
+
+</html>

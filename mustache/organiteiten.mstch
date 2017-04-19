@@ -1,0 +1,17 @@
+<html>
+
+<h1>Overzicht van organiteiten</h1>
+
+<ul>{{#.}}
+
+  <li>{{#.}}
+    <p><a href="{{id}}">{{toonnaam}}</a>, {{geboortejaar}}</p>
+    <p>Genres:</p>
+      <ul>{{#genres}}
+        <li>{{.}}</li>
+      {{/genres}}</ul>
+  {{/.}}</li>
+
+{{/.}}</ul>
+
+</html>

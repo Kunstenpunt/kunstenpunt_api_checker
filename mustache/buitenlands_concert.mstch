@@ -1,0 +1,15 @@
+<html>
+
+<h1>{{title}}</h1>
+
+<h2>Artiesten</h2>
+
+<ul>{{#artiesten}}
+  <li>{{#.}}<a href="{{artiest_id}}">{{artiest_naam}}</a>{{/.}}{{</li>}}
+{{/artiesten}}</ul>
+
+<h2>Locatie</h2>
+
+{{venue}}, {{locatie}}
+
+</html>

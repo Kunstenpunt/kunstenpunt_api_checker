@@ -1,0 +1,19 @@
+<html>
+
+<h1>{{production.titel}}, {{datum}}, {{ruimte}} ({{locatie}})</h1>
+
+<h2>Productie</h2>
+
+<p>Titel: {{production.titel}}</p>
+<p>Seizoen: {{production.seizoen.seizoen}}</p>
+
+<h2>Organisatoren</h2>
+
+<p>{{#production}}
+    <ul>{{#organiteiten}}
+      <li>{{#.}}
+        <a href="{{id}}">{{naam}}</a> ({{functie}})
+      {{/.}}</li>
+    {{/organiteiten}}</ul>
+{{/production}}</p>
+</html>

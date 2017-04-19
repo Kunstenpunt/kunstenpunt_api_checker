@@ -1,0 +1,18 @@
+<html>
+
+<h1>Overzicht van podiumvoorstellingen</h1>
+
+<ul>{{#.}}
+
+  <li>{{#.}}
+    <a href="{{id}}">{{productie_titel}}</a>
+    <ul>
+      <li>Artiesten: {{#productie_eigenaars}}{{.}}, {{/productie_eigenaars}}</li>
+      <li>Ruimtes: {{#ruimtes}}{{.}}, {{/ruimtes}}</li>
+      <li>Locaties: {{#locaties}}{{.}}, {{/locaties}}</li>
+    </ul>
+  {{/.}}</li>
+
+{{/.}}</ul>
+
+</html>

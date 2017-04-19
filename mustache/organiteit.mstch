@@ -1,0 +1,76 @@
+<html>
+<h1>{{toonnaam}} (Actief: {{actief}})</h1>
+
+<h2>Algemene informatie</h2>
+
+<p>Ook bekend als: <ul>{{#thesaurus}}<li>{{.}}</li>{{/thesaurus}}</ul></p>
+<p>Gelinkt aan: <ul>{{#gelinkte_organiteiten}}<li>{{.}}</li>{{/gelinkte_organiteiten}}</ul></p>
+
+<p>{{birthdate}}, {{birth_place}} - {{death_date}}, {{death_place}}</p>
+
+<p>{{beschrijving_nl}}</p>
+
+<p>Genre: <ul>{{#genres}}<li>{{.}}</li>{{/genres}}</ul></p>
+
+<p>Instrumenten: <ul>{{#instrumenten}}<li>{{.}}</li>{{/instrumenten}}</ul></p>
+
+<p>Website: <a href="{{website}}">{{toonnaam}}</a></p>
+
+<p>Email: <ul>{{#emails}}<li>{{.}}</li>{{/emails}}</ul></p>
+
+<p>Telefoon: <ul>{{#telefoonnummers}}<li>{{.}}</li>{{/telefoonnummers}}</ul></p>
+
+<p>Adres: <ul>{{#adressen}}<li>{{.}}</li>{{/adressen}}</ul></op>
+
+<h2>Beeldmateriaal</h2>
+<ul>{{#beeldmateriaal}}
+  <li>{{#.}}
+        <img src="{{url}}"/> {{titel_nl}} ({{jaar}})</li>
+      {{/.}}
+{{/beeldmateriaal}}
+</ul>
+
+<h2>Activiteiten</h2>
+
+<h3>Podiumproducties</h3>
+
+<ul>{{#activities.podiumproducties}}
+  <li>{{#.}}
+        <a href="{{id}}">{{titel}}</a> ({{seizoen.seizoen}})
+      {{/.}}
+  </li>
+{{/activities.podiumproducties}}
+</ul>
+
+<h3>Tentoonstellingen</h3>
+
+<ul>{{#activities.tentoonstellingen}}
+  <li>{{#.}}
+        <a href="{{id}}">{{titel}}</a>, {{#ruimtes}}{{.}}{{/ruimtes}} ({{#production_types}}{{.}},{{/production_types}} {{beginjaar}})
+      {{/.}}
+  </li>
+{{/activities.tentoonstellingen}}
+</ul>
+
+<h3>Releases</h3>
+
+<ul>{{#activities.muziekreleases}}
+  <li>{{#.}}
+        <a href="{{id}}">{{titel}}</a>, {{#artiesten}}{{.}}{{/artiesten}}
+      {{/.}}
+  </li>
+{{/activities.muziekreleases}}
+</ul>
+
+
+<h3>Buitenlandse concerten</h3>
+
+<ul>{{#activities.buitenlandse_concerten}}
+  <li>{{#.}}
+        <a href="{{id}}">{{titel}}</a>, {{#artiesten}}{{.}}{{/artiesten}} ({{venue}}, {{location}}, {{datum}})
+      {{/.}}
+  </li>
+{{/activities.buitenlandse_concerten}}
+</ul>
+
+</html>

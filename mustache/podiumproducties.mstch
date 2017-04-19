@@ -1,0 +1,13 @@
+<html>
+
+<h1>Overzicht van podiumproducties</h1>
+
+<ul>{{#.}}
+
+  <li>{{#.}}
+    <a href="{{id}}">{{titel}}</a>, {{seizoen.seizoen}}
+  {{/.}}</li>
+
+{{/.}}</ul>
+
+</html>
