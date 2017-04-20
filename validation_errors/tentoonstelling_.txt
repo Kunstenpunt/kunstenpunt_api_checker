@@ -1,0 +1,8 @@
+2017 is not of type 'string'
+
+Failed validating 'type' in schema['properties']['beginjaar']:
+    {'description': 'Beginjaar waarin de activiteit plaatsvindt',
+     'type': 'string'}
+
+On instance['beginjaar']:
+    2017

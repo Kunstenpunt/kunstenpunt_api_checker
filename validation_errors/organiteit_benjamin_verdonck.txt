@@ -1,0 +1,27 @@
+'2007' is not of type 'integer'
+
+Failed validating 'type' in schema['properties']['beeldmateriaal']['items']['properties']['jaar']:
+    {'description': 'jaar waarin de foto genomen werd', 'type': 'integer'}
+
+On instance['beeldmateriaal'][1]['jaar']:
+    '2007'
+
+--------------------------------------
+
+'2008' is not of type 'integer'
+
+Failed validating 'type' in schema['properties']['beeldmateriaal']['items']['properties']['jaar']:
+    {'description': 'jaar waarin de foto genomen werd', 'type': 'integer'}
+
+On instance['beeldmateriaal'][2]['jaar']:
+    '2008'
+
+--------------------------------------
+
+'2011' is not of type 'integer'
+
+Failed validating 'type' in schema['properties']['beeldmateriaal']['items']['properties']['jaar']:
+    {'description': 'jaar waarin de foto genomen werd', 'type': 'integer'}
+
+On instance['beeldmateriaal'][0]['jaar']:
+    '2011'

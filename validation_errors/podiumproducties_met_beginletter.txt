@@ -1,0 +1,8 @@
+{'seizoen': '1986-1987', 'seizoen_beginjaar': 1986} is not of type 'string'
+
+Failed validating 'type' in schema['properties']['seizoen']:
+    {'description': 'String van seizoen waarin de productie plaatsvindt.',
+     'type': 'string'}
+
+On instance['seizoen']:
+    {'seizoen': '1986-1987', 'seizoen_beginjaar': 1986}

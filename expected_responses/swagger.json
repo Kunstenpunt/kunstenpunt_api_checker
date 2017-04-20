@@ -1,0 +1,1799 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Deze API biedt een geïntegreerd zicht op de praktijkbeschrijvende databanken van het Kunstenpunt, die de podiumkunsten, beeldende kunsten en muziek in Vlaanderen en Brussel omvatten.",
+    "version": "1.0",
+    "title": "Kunstenpunt API"
+  },
+  "host": "localhost:8080",
+  "basePath": "/v1",
+  "schemes": [
+    "http"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/organiteiten": {
+      "get": {
+        "tags": [
+          "organiteit"
+        ],
+        "summary": "Toont organiteiten binnen het kunstenlandschap.",
+        "description": "Met deze API call kan een lijst van organiteiten met hun minimale informatie opgeroepen worden. De API levert enkel die organiteiten terug die ook in de databank KSP/FAI aangevinkt hebben. De parameters worden als AND aan elkaar gehangen; als een parameter niet gespecifieerd is dan wordt er op die parameter niet gefilterd; als twee of meer parameters gespecifieerd zijn moeten alle parameters vervuld zijn.",
+        "parameters": [
+          {
+            "name": "organiteit_naam_begint_met",
+            "in": "query",
+            "description": "De beginletter van een organiteitnaam. Organiteiten waarvan de naam begint met een niet-alfabetisch karakter, bv. 't Ey, worden gevonden door de '#' hier mee te geven. (eerste letter van mcv:identities.Name, mcv:organisations.Name, dkb:people.name, dkb:organisations.name, dkb:venues.name)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "organiteit_type_id",
+            "in": "query",
+            "description": "IDs van organiteitstypes die allemaal moeten gevonden worden. (mcv:cms_identitytypes.ID, mcv:cms_organisationstypes.ID, dkb:people_types.id, dkb:organisation_types.id, WAT BIJ VENUES?",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "genre_id",
+            "in": "query",
+            "description": "De ids van de genres waarin de organiteiten mogen vallen.",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "instrument_id",
+            "in": "query",
+            "description": "ID van een instrument, enkel mogelijk bij mcv:identities",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "active",
+            "in": "query",
+            "description": "Of de organiteit als actief bestempeld is in de databank",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Voor paginatie",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Voor paginatie",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Een lijst van organiteit IDs met hun toonnaam en andere informatie",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/OrganiteitenItem"
+              }
+            },
+            "headers": {
+              "x_total_count": {
+                "type": "integer",
+                "description": "Totaal aantal gevonden organiteiten"
+              }
+            }
+          },
+          "default": {
+            "description": "Onverwachte fout",
+            "schema": {
+              "$ref": "#/definitions/Fout"
+            }
+          }
+        }
+      }
+    },
+    "/organiteiten/{organiteit_id}": {
+      "get": {
+        "tags": [
+          "organiteit"
+        ],
+        "summary": "Toont de beschikbare gegevens voor een specifieke organiteit.",
+        "description": "Met deze API call wordt een 'fichebak' kaart van een specifieke organiteit opgeroepen. Dit bevat dan ook de gelinkt activiteiten.",
+        "parameters": [
+          {
+            "name": "organiteit_id",
+            "in": "path",
+            "description": "De unieke identificator van een organiteit.",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "De gegevens van een specifieke organiteit. Welke gegevens getoond worden staat beschreven in het Model 'Organiteit'.",
+            "schema": {
+              "$ref": "#/definitions/Organiteit"
+            }
+          },
+          "default": {
+            "description": "Onverwachte fout.",
+            "schema": {
+              "$ref": "#/definitions/Fout"
+            }
+          }
+        }
+      }
+    },
+    "/tentoonstellingen": {
+      "get": {
+        "tags": [
+          "beeldendekunsten"
+        ],
+        "summary": "Een lijst van solo- en groepstentoonstellingen.",
+        "description": "Alle gegevens nodig om een lijst te maken van solo- en groepstentoonstellingen.",
+        "parameters": [
+          {
+            "name": "jaar",
+            "in": "query",
+            "description": "Het jaar waarin een tentoonstelling plaatsvindt",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "maand",
+            "in": "query",
+            "description": "De maand waarin een tentoonstelling plaatsvindt",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "name": "land_id",
+            "in": "query",
+            "description": "het land van de location van de organisatie die aan de tentoonstelling hangt met als functie 'locatie'",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "location_id",
+            "in": "query",
+            "description": "de location van de organisatie die aan de tentoonstelling hangt met als functie 'locatie'",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "organiteit_id",
+            "in": "query",
+            "description": "Een id van een organiteit om de lijst van solo- en groepstentoonstellingen te vinden.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Een overzichtslijst van tentoonstellingen.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TentoonstellingenItem"
+              }
+            }
+          },
+          "default": {
+            "description": "Onverwachte fout",
+            "schema": {
+              "$ref": "#/definitions/Fout"
+            }
+          }
+        }
+      }
+    },
+    "/tentoonstellingen/{activiteit_id}": {
+      "get": {
+        "tags": [
+          "beeldendekunsten"
+        ],
+        "summary": "De gegevens van een tentoonstelling",
+        "description": "Een tentoonstelling krijgt een eigen pad zodat de gegevens makkelijk opgehaald kunnen worden.",
+        "parameters": [
+          {
+            "name": "activiteit_id",
+            "in": "path",
+            "description": "De id van een specifieke tentoonstelling waarvoor de gegevens moeten opgevraagd worden",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "De gegevens van een specifiek tentoonstelling.",
+            "schema": {
+              "$ref": "#/definitions/Tentoonstelling"
+            }
+          },
+          "default": {
+            "description": "Onverwachte fout",
+            "schema": {
+              "$ref": "#/definitions/Fout"
+            }
+          }
+        }
+      }
+    },
+    "/recent_gewijzigde_activiteiten": {
+      "get": {
+        "tags": [
+          "tools"
+        ],
+        "summary": "Een lijst van recent gewijzigde tentoonstellingen, releases, of andere activiteiten",
+        "description": "Recent gewijzigde activiteiten in dit lijstje",
+        "responses": {
+          "200": {
+            "description": "De lijst van recent gewijzigde activiteiten",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/KorteLijstActiviteitenItem"
+              }
+            }
+          },
+          "default": {
+            "description": "Onverwachte fout",
+            "schema": {
+              "$ref": "#/definitions/Fout"
+            }
+          }
+        }
+      }
+    },
+    "/recent_gewijzigde_activiteiten/{type_activiteit}": {
+      "get": {
+        "tags": [
+          "tools"
+        ],
+        "summary": "Een lijst van recent gewijzigde tentoonstellingen, releases, of andere activiteiten",
+        "description": "Recent gewijzigde activiteiten van een bepaald type komen in dit lijstje",
+        "parameters": [
+          {
+            "name": "type_activiteit",
+            "in": "path",
+            "description": "het type van activiteit, kan zijn 'tentoonstellingen', 'muziekreleases', 'buitenlandse_concerten', 'podiumproducties', 'podiumvoorstellingen'",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "De lijst van recent gewijzigde activiteiten van een bepaald type",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/KorteLijstActiviteitenItem"
+              }
+            }
+          },
+          "default": {
+            "description": "Onverwachte fout",
+            "schema": {
+              "$ref": "#/definitions/Fout"
+            }
+          }
+        }
+      }
+    },
+    "/binnenkort": {
+      "get": {
+        "tags": [
+          "tools"
+        ],
+        "summary": "Een lijst van activiteiten met begindatum in de nabije toekomst",
+        "description": "Activiteiten die een begindatum hebben binnen de 7 dagen",
+        "responses": {
+          "200": {
+            "description": "De activiteiten met nabije begindatum",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/KorteLijstActiviteitenItem"
+              }
+            }
+          },
+          "default": {
+            "description": "Onverwachte fout",
+            "schema": {
+              "$ref": "#/definitions/Fout"
+            }
+          }
+        }
+      }
+    },
+    "/binnenkort/{type_activiteit}": {
+      "get": {
+        "tags": [
+          "tools"
+        ],
+        "summary": "Een lijst van activiteiten van een bepaald type met begindatum in de nabije toekomst",
+        "description": "Activiteiten die een begindatum hebben binnen de 7 dagen",
+        "parameters": [
+          {
+            "name": "type_activiteit",
+            "in": "path",
+            "description": "Het type van activiteit",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "De activiteiten van een bepaald type met nabije begindatum",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/KorteLijstActiviteitenItem"
+              }
+            }
+          },
+          "default": {
+            "description": "Onverwachte fout",
+            "schema": {
+              "$ref": "#/definitions/Fout"
+            }
+          }
+        }
+      }
+    },
+    "/tien_jaar_geleden": {
+      "get": {
+        "tags": [
+          "tools"
+        ],
+        "summary": "Een lijst van activiteiten met begindatum 10 jaar terug",
+        "description": "Activiteiten die een begindatum hebben ongeveer 10 jaar geleden, gebalanceerd tussen de disciplines",
+        "responses": {
+          "200": {
+            "description": "De activiteiten met datum ongeveer 10 jaar terug",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/KorteLijstActiviteitenItem"
+              }
+            }
+          },
+          "default": {
+            "description": "Onverwachte fout",
+            "schema": {
+              "$ref": "#/definitions/Fout"
+            }
+          }
+        }
+      }
+    },
+    "/locaties": {
+      "get": {
+        "tags": [
+          "tools"
+        ],
+        "summary": "Om een lijst van unieke locaties te kunnen krijgen",
+        "description": "Unieke locaties, op land of op stadsniveau",
+        "parameters": [
+          {
+            "name": "stadsniveau",
+            "type": "boolean",
+            "required": true,
+            "description": "moeten de locaties tot op stadsniveau gespecifieerd worden?",
+            "in": "query"
+          },
+          {
+            "name": "type_activiteit",
+            "type": "string",
+            "required": false,
+            "description": "om de lijst van locaties in te perken tot die waarvoor er ook een activiteit geregistreerd staat",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Locaties",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "stad_id": {
+                    "type": "integer",
+                    "description": "ID van de stad"
+                  },
+                  "land_id": {
+                    "type": "integer",
+                    "description": "ID van het land"
+                  },
+                  "stad_naam": {
+                    "type": "string",
+                    "description": "Naam van de stad"
+                  },
+                  "land_naam": {
+                    "type": "string",
+                    "description": "naam van het land"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Onverwachte fout",
+            "schema": {
+              "$ref": "#/definitions/Fout"
+            }
+          }
+        }
+      }
+    },
+    "/muziekreleases": {
+      "get": {
+        "tags": [
+          "muziek"
+        ],
+        "summary": "Toont een overzicht van releases, mogelijk gefilterd naar release datum of van een specifieke organiteit",
+        "description": "Releases zijn een specifieke vorm van een Activiteit, met name binnen de discipline van de Muziek. De lijst van releases kan ingeperkt worden door een datum range op te geven, en/of door een specifieke organiteit aan te geven.",
+        "parameters": [
+          {
+            "name": "from_date",
+            "in": "query",
+            "description": "De vroegste datum waarop het album gereleased mag zijn.",
+            "required": false,
+            "type": "string",
+            "format": "date"
+          },
+          {
+            "name": "until_date",
+            "in": "query",
+            "description": "De laatste datum waarop het album gereleased mag zijn.",
+            "required": false,
+            "type": "string",
+            "format": "date"
+          },
+          {
+            "name": "jaar",
+            "in": "query",
+            "description": "Het jaar waarin de release verschenen is",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "organiteit_id",
+            "in": "query",
+            "description": "De organiteit waarmee het album gerelateerd mag zijn. Deze query  levert ook terug wat het type van relatie is tussen de release en de organiteit.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "genre_id",
+            "in": "query",
+            "description": "De ids van de genres waarin de releases mogen vallen (OR dus).",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Voor paginatie",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Voor paginatie",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Een lijst van releases met hun release datum.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/MuziekreleasesItem"
+              }
+            },
+            "headers": {
+              "x_total_count": {
+                "type": "integer",
+                "description": "Totaal aantal gevonden releases"
+              }
+            }
+          },
+          "default": {
+            "description": "Onverwachte fout",
+            "schema": {
+              "$ref": "#/definitions/Fout"
+            }
+          }
+        }
+      }
+    },
+    "/muziekreleases/{activiteit_id}": {
+      "get": {
+        "tags": [
+          "muziek"
+        ],
+        "summary": "Geeft een detailzicht op een specifieke release.",
+        "description": "Door de unieke id van een release mee te geven wordt een detailzicht van de release getoond. Gerelateerde informatie zoals de verbonden organiteiten (groep, muzikanten, platenfirma) kunnen opgezocht worden met /organiteiten/?activiteit_id=:activiteit_id. Voor de gerelateerde genres kan je zoeken met /genres/?activiteit_id=:activiteit_id.",
+        "parameters": [
+          {
+            "name": "activiteit_id",
+            "in": "path",
+            "description": "De unieke identificator voor een release.",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Een specifiek zicht op een release.",
+            "schema": {
+              "$ref": "#/definitions/Muziekrelease"
+            }
+          },
+          "default": {
+            "description": "Onverwachte fout",
+            "schema": {
+              "$ref": "#/definitions/Fout"
+            }
+          }
+        }
+      }
+    },
+    "/buitenlandse_concerten": {
+      "get": {
+        "tags": [
+          "muziek"
+        ],
+        "summary": "Een lijst van buitenlands concerten.",
+        "description": "Alle gegevens nodig om een lijst te maken met een overzicht van buitenlands concerten.",
+        "parameters": [
+          {
+            "name": "jaar",
+            "in": "query",
+            "description": "Het jaar waarin het buitenlands concert plaatsvindt",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "land_id",
+            "in": "query",
+            "description": "De ID van het land waarin het buitenlands concert plaatsvindt (gelinkte venue)",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "cocation_id",
+            "in": "query",
+            "description": "De ID van de location die aan de gelinkte venue hangt.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "organiteit_id",
+            "in": "query",
+            "description": "Een id van een organiteit om de buitenlandse concerten van te vinden.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "from_date",
+            "in": "query",
+            "description": "De vroegste datum waarop het buitenlands concert plaats mag vinden.",
+            "required": false,
+            "type": "string",
+            "format": "date"
+          },
+          {
+            "name": "until_date",
+            "in": "query",
+            "description": "De laatste datum waarop het buitenlands concert plaats mag vinden.",
+            "required": false,
+            "type": "string",
+            "format": "date"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Voor paginatie",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Voor paginatie",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Een overzichtslijst van buitenlands concerten.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BuitenlandseConcertenItem"
+              }
+            },
+            "headers": {
+              "x_total_count": {
+                "type": "integer",
+                "description": "Totaal aantal gevonden buitenlandse concerten"
+              }
+            }
+          },
+          "default": {
+            "description": "Onverwachte fout",
+            "schema": {
+              "$ref": "#/definitions/Fout"
+            }
+          }
+        }
+      }
+    },
+    "/buitenlandse_concerten/{activiteit_id}": {
+      "get": {
+        "tags": [
+          "muziek"
+        ],
+        "summary": "De gegevens van een buitenlands concert",
+        "description": "Een buitenlands concert krijgt een eigen pad zodat de gegevens makkelijk opgehaald kunnen worden.",
+        "parameters": [
+          {
+            "name": "activiteit_id",
+            "in": "path",
+            "description": "De id van een specifiek buitenlands concert waarvoor de gegevens moeten opgevraagd worden",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "De gegevens van een specifiek buitenlands concert.",
+            "schema": {
+              "$ref": "#/definitions/BuitenlandsConcert"
+            }
+          },
+          "default": {
+            "description": "Onverwachte fout",
+            "schema": {
+              "$ref": "#/definitions/Fout"
+            }
+          }
+        }
+      }
+    },
+    "/podiumproducties": {
+      "get": {
+        "tags": [
+          "podium"
+        ],
+        "summary": "Een lijst van podium producties",
+        "description": "Alle gegevens nodig om een lijst te maken van podium producties, eventueel voor een specifieke organiteit.",
+        "operationId": "controllers.default_controller.podiumproducties_get",
+        "parameters": [
+          {
+            "name": "seizoen_id",
+            "in": "query",
+            "description": "Een id van een seizoen",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "genre_id",
+            "in": "query",
+            "description": "De ids van de genres waarin de podiumproducties mogen vallen (OR dus).",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "activiteit_naam_begint_met",
+            "in": "query",
+            "description": "Eerste letter waarmee de podiumproductietitel moet beginnen",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "organiteit_id",
+            "in": "query",
+            "description": "Een id van een organiteit om de podium producties te vinden.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "podium_productie_id",
+            "in": "query",
+            "description": "Een id van een podiumproductie om de gerelateerde producties te vinden, bv. een herneming.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "from_date",
+            "in": "query",
+            "description": "De vroegste datum waarop de podiumproductie mag plaatsvinden.",
+            "required": false,
+            "type": "string",
+            "format": "date"
+          },
+          {
+            "name": "until_date",
+            "in": "query",
+            "description": "De laatste datum waarop de podiumproductie mag plaatsvinden.",
+            "required": false,
+            "type": "string",
+            "format": "date"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Voor paginatie",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Voor paginatie",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Een overzichtslijst van podium producties.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PodiumProductiesItem"
+              }
+            },
+            "headers": {
+              "x_total_count": {
+                "type": "integer",
+                "description": "Totaal aantal gevonden podium producties"
+              }
+            }
+          },
+          "default": {
+            "description": "Onverwachte fout",
+            "schema": {
+              "$ref": "#/definitions/Fout"
+            }
+          }
+        }
+      }
+    },
+    "/podiumproducties/{podium_productie_id}": {
+      "get": {
+        "tags": [
+          "podium"
+        ],
+        "summary": "Een specifiek zicht op een podium productie.",
+        "description": "Alle gegevens nodig om een specifieke podium productie te tonen.",
+        "parameters": [
+          {
+            "name": "podium_productie_id",
+            "in": "path",
+            "description": "ID van een podium productie",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Een podium productie",
+            "schema": {
+              "$ref": "#/definitions/PodiumProductie"
+            }
+          },
+          "default": {
+            "description": "Onverwachte fout",
+            "schema": {
+              "$ref": "#/definitions/Fout"
+            }
+          }
+        }
+      }
+    },
+    "/podiumvoorstellingen": {
+      "get": {
+        "tags": [
+          "podium"
+        ],
+        "summary": "Een lijst van podium voorstellingen",
+        "description": "Alle gegevens nodig om een lijst te maken van podium voorstellingen, eventueel voor een specifieke podium productie of een organiteit.",
+        "operationId": "controllers.default_controller.podiumvoorstellingen_get",
+        "parameters": [
+          {
+            "name": "seizoen_id",
+            "in": "query",
+            "description": "Het seizoen van de productie waartoe de voorstelling behoort. Bijvoorbeeld: SELECT shows.id  FROM  production.shows,  production.productions,  production.seasons  WHERE  shows.production_id = productions.id AND  productions.season_id = seasons.id AND  seasons.id = 1678;",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "land_id",
+            "in": "query",
+            "description": "Het land van de venue waarin de show plaatsvindt",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "genre_id",
+            "in": "query",
+            "description": "De ids van de genres waarin de producties waartoe de voorstellingen behoren mogen vallen. Bijvoorbeeld: SELECT shows.id FROM production.shows, production.productions, production.relationships,   production.genres WHERE shows.production_id = productions.id AND relationships.production_id = productions.id AND genres.id = relationships.genre_id AND genres.id IN (2313, 2318);",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "podiumproductie_id",
+            "in": "query",
+            "description": "een ID van een podiumproductie",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "organiteit_id",
+            "in": "query",
+            "description": "Een id van een organiteit om de podium voorstellingen te vinden. Linkt ook door van een productie die bij een organiteit hoort.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "from_date",
+            "in": "query",
+            "description": "De vroegste datum waarop het de podiumvoorstelling mag plaatsvinden.",
+            "required": false,
+            "type": "string",
+            "format": "date"
+          },
+          {
+            "name": "until_date",
+            "in": "query",
+            "description": "De laatste datum waarop de podiumvoorstelling mag plaatsvinden.",
+            "required": false,
+            "type": "string",
+            "format": "date"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Voor paginatie",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Voor paginatie",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Een overzichtslijst van podium voorstellingen.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PodiumVoorstellingenItem"
+              }
+            },
+            "headers": {
+              "x_total_count": {
+                "type": "integer",
+                "description": "Totaal aantal gevonden voorstellingen"
+              }
+            }
+          },
+          "default": {
+            "description": "Onverwachte fout",
+            "schema": {
+              "$ref": "#/definitions/Fout"
+            }
+          }
+        }
+      }
+    },
+    "/podiumvoorstellingen/{activiteit_id}": {
+      "get": {
+        "tags": [
+          "podium"
+        ],
+        "summary": "De gegevens van een podiumvoorstelling",
+        "description": "Een podiumvoorstelling krijgt een eigen pad zodat de gegevens makkelijk opgehaald kunnen worden.",
+        "parameters": [
+          {
+            "name": "activiteit_id",
+            "in": "path",
+            "description": "De id van een specifieke podiumvoorstelling waarvoor de gegevens moeten opgevraagd worden",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "De gegevens van een specifieke podiumvoorstelling.",
+            "schema": {
+              "$ref": "#/definitions/PodiumVoorstelling"
+            }
+          },
+          "default": {
+            "description": "Onverwachte fout",
+            "schema": {
+              "$ref": "#/definitions/Fout"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "OrganiteitenItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Een unieke identificator die gebruikt kan worden om een link te construeren, bv. /organiteiten/{organiteit_id}. mcv:organisations.ID, mcv:identities.ID, dkb:people.id, dkb:organisations.id, dkb:venues.id"
+        },
+        "toonnaam": {
+          "type": "string",
+          "description": "Een toonbare naam voor de organiteit. mcv:identities.FullName, mcv:organisations.Name, dkb:people.full_name, dkb:organisations.name, dkb:venues.name"
+        },
+        "instrumenten": {
+          "type": "array",
+          "description": "Instrumenten die door organiteit bespeeld worden.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "organiteit_type": {
+          "type": "array",
+          "description": "Lijst van de organiteitstypes die aan een organiteit hangen. mcv:cms_identitytypes.Name, mcv:cms_organisationtypes.Name, dkb:people_types.name, dkb:organisation_types.name",
+          "items": {
+            "type": "string",
+            "description": "Organiteitstype."
+          }
+        },
+        "genres": {
+          "type": "array",
+          "description": "Lijst van genres die aan een organiteit kan hangen. mcv join via dblinkcat=28, dkb:people, dkb:organisations, dkb:venues",
+          "items": {
+            "type": "string",
+            "description": "Genre"
+          }
+        },
+        "startjaar": {
+          "type": "integer",
+          "description": "Geboortejaar of startjaar. mcv:identities, mcv:organisations, dkb:people.birth_date_id <> dkb:date_isaars.year, dkb:organisations, dkb:venues"
+        },
+        "locatie": {
+          "type": "string",
+          "description": "De (fysieke) locaties waar de organiteit mee gelinkt is. mcv:identities, mcv:organisations, dkb:people, dkb:organisations, dkb:venues"
+        },
+        "gps": {
+          "type": "object",
+          "description": "GPS coordinaten voor de locatie. mcv:identities, mcv:organisations, dkb:people, dkb:organisations, dkb:venues",
+          "properties": {
+            "latitude": {
+              "type": "number"
+            },
+            "longitude": {
+              "type": "number"
+            }
+          }
+        },
+        "actief": {
+          "type": "boolean",
+          "description": "Aanduiding of de organiteit actief is. mcv:identities, mcv:organisations, dkb:people, dkb:organisations, dkb:venues"
+        }
+      }
+    },
+    "Organiteit": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unieke identifier van een organiteit."
+        },
+        "toonnaam": {
+          "type": "string",
+          "description": "Toonbare tekst. mcv:identities.FullName, mcv:organisations.Name, dkb:people.full_name, dkb:organisations.name, dkb:venues.name"
+        },
+        "toonnaam_kort": {
+          "type": "string",
+          "description": "Eventuele afkorting van de toonnaam"
+        },
+        "toonnaam_internationaal": {
+          "type": "string",
+          "description": "als het er is, de internationale naam"
+        },
+        "thesaurus": {
+          "type": "array",
+          "description": "De alternatieve schrijfwijzen voor de toonnaam",
+          "items": {
+            "type": "string"
+          }
+        },
+        "beeldmateriaal": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "mcv:organisations = 'SELECT images.FileName, images.Copyright FROM images, dblinking WHERE dblinking.LinkID=images.ID AND dblinking.ObjectType=3 AND dblinking.ObjectID=:organisation_id AND dblinking.LinkType=9 AND dblinking.LinkCategory=25', mcv:identities = 'SELECT images.FileName, images.Copyright FROM images, dblinking WHERE dblinking.LinkID=images.ID AND dblinking.ObjectType=2 AND dblinking.ObjectID=:identity_id AND dblinking.LinkType=9 AND dblinking.LinkCategory=25'",
+            "properties": {
+              "url": {
+                "type": "string",
+                "description": "Hyperlink naar een beeldfragment."
+              },
+              "titel_nl": {
+                "type": "string",
+                "description": "titel van het beeld"
+              },
+              "subtitel_nl": {
+                "type": "string",
+                "description": "subtitel van het beeld"
+              },
+              "title_en": {
+                "type": "string",
+                "description": "title of the image"
+              },
+              "subtitle_en": {
+                "type": "string",
+                "description": "subtitle of the image"
+              },
+              "copyright": {
+                "type": "string",
+                "description": "copyright houder"
+              },
+              "jaar": {
+                "type": "integer",
+                "description": "jaar waarin de foto genomen werd"
+              }
+            }
+          }
+        },
+        "downloads": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "file van het type 'download' (tbd.)",
+            "properties": {
+              "naam": {
+                "type": "string",
+                "description": "Naam van het bestand"
+              },
+              "url": {
+                "type": "string",
+                "description": "pad naar download"
+              }
+            }
+          }
+        },
+        "beschrijvingen_nl": {
+          "type": "string",
+          "description": "Korte beschrijving in het Nederlands. mcv:organisations.information_nl, mcv:identities.short_description_NL + bio_NL, dkb:organisations, dkb:people.bio_nl + cv_nl + personal_description_nl, dkb:venues.?"
+        },
+        "beschrijvingen_en": {
+          "type": "string",
+          "description": "Korte beschrijving in het Engels, cf. _nl beschrijving maar dan met _en"
+        },
+        "gelinkte_organiteiten": {
+          "type": "array",
+          "description": "Organiteiten gelinkt aan de getoonde organiteit, waarbij de link ook een type kan hebben, bv. 'is lid van' of 'verderzetting van'",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "ID van organiteit"
+              },
+              "toonnaam": {
+                "type": "string",
+                "description": "Toonnaam van organiteit"
+              },
+              "relatie_type": {
+                "type": "string",
+                "description": "typering van relatie"
+              }
+            }
+          }
+        },
+        "startjaar": {
+          "type": "integer",
+          "format": "date",
+          "description": "Geboortejaar of stichtingsjaar van organiteit. mcv:identities.DateOfBirth, mcv:organisations.YearOfFormation, dkb:people.birthdate_id <> dkb:date_isaars.year, dkb:organisations.start_activities_date_id <> dkb:date_isaars.year"
+        },
+        "startlocatie": {
+          "type": "string",
+          "description": "Geboorteplaats of stichtingsplaats van organisatie. mcv:identities.LocationOfBirth, mcv:organisations.LocationOfFormation"
+        },
+        "einddatum": {
+          "type": "integer",
+          "description": "Sterftejaar of terminatiejaar van organiteit. , dkb:people.death_date_id <> dkb:date_isaars.year, dkb:organisations.end_activities_date_id <> dkb:date_isaars"
+        },
+        "eindlocatie": {
+          "type": "string",
+          "description": "Sterftelocatie of terminatielocaie van organiteit.  mcv:identities.LocationOfDeath, mcv:organisations.LocationOfTermination"
+        },
+        "websites": {
+          "type": "array",
+          "description": "Websites gelinkt aan een organiteit. mcv:*.OfficialWebsite + OtherWebsite, dkb:*.url + archive_url",
+          "items": {
+            "type": "string",
+            "description": "URL van website."
+          }
+        },
+        "emails": {
+          "type": "array",
+          "description": "Emails gelinkt aan de organiteit, enkel als overeenkomstig 'publish' veld ok is. mcv:*.Email, dkb:*.email",
+          "items": {
+            "type": "string",
+            "format": "email",
+            "description": "Email van organiteit"
+          }
+        },
+        "adressen": {
+          "type": "array",
+          "description": "Adressen gelinkt aan organiteit, enkel als overeenkomstig 'publish' veld ok is",
+          "items": {
+            "type": "string",
+            "description": "Vrije tekst adres"
+          }
+        },
+        "telefoonnummers": {
+          "type": "array",
+          "description": "Telefoonnummers gelinkt aan organiteit, enkel als overeenkomstig 'publish' veld ok is",
+          "items": {
+            "type": "string",
+            "description": "Telefoonnummer van organiteit"
+          }
+        },
+        "actief": {
+          "type": "boolean",
+          "description": "Is dit een actieve organiteit?"
+        },
+        "genres": {
+          "type": "array",
+          "description": "Lijst van genres die aan een organiteit kan hangen. mcv:identities, mcv:organisations, dkb:people, dkb:organisations, dkb:venues",
+          "items": {
+            "type": "string",
+            "description": "Genre"
+          }
+        },
+        "instrumenten": {
+          "type": "array",
+          "description": "Instrumenten die door organiteit bespeeld worden. mcv:identities",
+          "items": {
+            "type": "string"
+          }
+        },
+        "activiteiten": {
+          "type": "object",
+          "description": "Overzicht van de activiteiten van een organiteit",
+          "properties": {
+            "tentoonstellingen": {
+              "type": "array",
+              "description": "lijst van tentoonstellingen door een organiteit",
+              "items": {
+                "$ref": "#/definitions/TentoonstellingenItem"
+              }
+            },
+            "groepstentoonstellingen_legacy": {
+              "type": "string",
+              "description": "legacy platte tekst groepstentoonstellingen uit cv veld"
+            },
+            "buitenlandse_concerten": {
+              "type": "array",
+              "description": "lijst van buitenlandse concerten door een organiteit",
+              "items": {
+                "$ref": "#/definitions/BuitenlandseConcertenItem"
+              }
+            },
+            "muziekreleases": {
+              "type": "array",
+              "description": "lijst van muziekreleases door een organiteit. mcv:organisations = 'SELECT DISTINCT c.ID, c.Title, c.VersionInfo, c.ReleaseDate, l.LinkCategory FROM carriers c INNER JOIN dblinking l ON l.LinkType=3 AND l.ObjectID=c.ID AND l.ObjectType=5 AND l.LinkCategory IN (46, 24, 23) WHERE l.LinkID=:organisation_id AND ((c.Filter & 2) = 2) AND c.Hidden=0 ORDER BY ReleaseDate DESC LIMIT {1} OFFSET {2}', mcv:identities = 'SELECT DISTINCT c.ID, c.Title, c.VersionInfo, c.ReleaseDate, mac.Name FROM carriers c LEFT JOIN carriermembers cm ON cm.CarrierID=c.ID LEFT JOIN carriermainartists cma ON cma.CarrierID=c.ID LEFT JOIN mainartistcontext mac ON cma.ContextID=mac.ID WHERE (cm.IdentityID=:identity_id OR cma.IdentityID={0}) AND c.Hidden=0 AND ((c.Filter & 2) = 2) ORDER BY ReleaseDate DESC LIMIT {1} OFFSET {2}'",
+              "items": {
+                "$ref": "#/definitions/MuziekreleasesItem"
+              }
+            },
+            "podiumproducties": {
+              "type": "array",
+              "description": "lijst van podiumproducties gelinkt aan een organiteit",
+              "items": {
+                "$ref": "#/definitions/PodiumProductiesItem"
+              }
+            }
+          }
+        }
+      }
+    },
+    "TentoonstellingenItem": {
+      "type": "object",
+      "description": "Een tentoonstellingsfiche",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Een unieke identificator van de tentoonstelling"
+        },
+        "kunstenaars": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "de id van de gelinkte kunstenaar, als de kunstenaar een channel heeft."
+              },
+              "naam": {
+                "type": "string",
+                "description": "De naam van de gelinkte kunstenaar, ook als de kunstenaar geen channel heeft."
+              }
+            }
+          }
+        },
+        "titel": {
+          "type": "string",
+          "description": "Een toonbare naam voor de tentoonstelling"
+        },
+        "ruimtes": {
+          "type": "array",
+          "description": "De naam van de ruimtes waar de activiteit plaatsgevonden heeft",
+          "items": {
+            "type": "string",
+            "description": "De ruimte (organisatie, venue, ...) waar dit plaatsvond"
+          }
+        },
+        "locatie": {
+          "type": "string",
+          "description": "De (fysieke) locaties (stad, land) waar de activiteit plaatsgevonden heeft."
+        },
+        "beginjaar": {
+          "type": "integer",
+          "description": "Beginjaar van de tentoonstelling."
+        },
+        "tentoonstellingstype": {
+          "type": "string",
+          "description": "of dit een solo dan wel een groepstentoonstelling is, cf. production_type"
+        },
+        "gps": {
+          "type": "object",
+          "description": "GPS coordinaten voor de locatie",
+          "properties": {
+            "latitude": {
+              "type": "number"
+            },
+            "longitude": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "Tentoonstelling": {
+      "type": "object",
+      "description": "Een tentoonstellingsfiche",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Een unieke identificator van de tentoonstelling"
+        },
+        "kunstenaar": {
+          "type": "string",
+          "description": "De naam van de gelinkte kunstenaar"
+        },
+        "titel": {
+          "type": "string",
+          "description": "Een toonbare naam voor de tentoonstelling"
+        },
+        "ruimtes": {
+          "type": "array",
+          "description": "De ruimtes waar de activiteit plaatsgevonden heeft",
+          "items": {
+            "type": "string",
+            "description": "De ruimte (organisatie, venue, ...) waar dit plaatsvond"
+          }
+        },
+        "locaties": {
+          "type": "array",
+          "description": "De (fysieke) locaties (stad, land) waar de activiteit plaatsgevonden heeft.",
+          "items": {
+            "type": "string",
+            "description": "De locatie (stad, dorp, ...) waar de activiteit plaatsvond"
+          }
+        },
+        "beginjaar": {
+          "type": "string",
+          "description": "Beginjaar waarin de activiteit plaatsvindt"
+        },
+        "tentoonstellingstype": {
+          "type": "string",
+          "description": "of dit een solo dan wel een groepstentoonstelling, cf. production_type is"
+        }
+      }
+    },
+    "KorteLijstActiviteitenItem": {
+      "type": "object",
+      "description": "generieke korte beschrijving van een activiteit",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "unieke identiefier van een activiteit"
+        },
+        "toonnaam": {
+          "type": "string",
+          "description": "een toonnaam voor de activiteit, moet worden gespecifieerd per type van activiteit"
+        },
+        "activiteit_type": {
+          "type": "array",
+          "description": "De types van de activiteit, bv. muziekrelease, tentoonstelling, cf. production_type en show_type",
+          "items": {
+            "type": "string",
+            "description": "showtype of productiontype"
+          }
+        }
+      }
+    },
+    "PodiumProductiesItem": {
+      "type": "object",
+      "description": "Een korte beschrijving van een podiumproductie voor in een lijstje.",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unieke identifier van een productie."
+        },
+        "titel": {
+          "type": "string",
+          "description": "Toonbare tekst voor een productie namelijk de titel."
+        },
+        "seizoen": {
+          "type": "string",
+          "description": "String van seizoen waarin de productie plaatsvindt."
+        },
+        "seizoen_beginjaar": {
+          "type": "integer",
+          "description": "Beginjaar van het seizoen"
+        }
+      }
+    },
+    "PodiumProductie": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unieke identifier van een productie."
+        },
+        "titel": {
+          "type": "string",
+          "description": "Toonbare tekst voor een productie namelijk de titel."
+        },
+        "seizoen": {
+          "type": "string",
+          "description": "String van seizoen waarin de productie plaatsvindt."
+        },
+        "seizoen_beginjaar": {
+          "type": "integer",
+          "description": "Beginjaar van het seizoen"
+        },
+        "organiteiten": {
+          "type": "array",
+          "description": "Gelinkte organiteiten",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "ID van de gelinkt organiteit"
+              },
+              "naam": {
+                "type": "string",
+                "description": "naam van de gelinkte organiteit"
+              },
+              "functie": {
+                "type": "string",
+                "description": "functie die de gelinkte organiteit uitoefent bij de productie"
+              }
+            }
+          }
+        },
+        "voorstellingen": {
+          "type": "array",
+          "description": "Gelinkte voorstellingen",
+          "items": {
+            "$ref": "#/definitions/PodiumVoorstellingenItem"
+          }
+        }
+      }
+    },
+    "PodiumVoorstellingenItem": {
+      "type": "object",
+      "description": "Een fiche voor een podiumvoorstelling",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "de ID van een podiumvoorstelling"
+        },
+        "productie_titel": {
+          "type": "string",
+          "description": "De titel van de gerelateerde podiumproductie"
+        },
+        "productie_eigenaars": {
+          "type": "array",
+          "description": "een lijst van gezelschappen, producenten, en de VIP gerelateerde persoon",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ruimtes": {
+          "type": "array",
+          "description": "De ruimtes waar de activiteit plaatsgevonden heeft",
+          "items": {
+            "type": "string",
+            "description": "De ruimte (organisatie, venue, ...) waar dit plaatsvond"
+          }
+        },
+        "locaties": {
+          "type": "array",
+          "description": "De (fysieke) locaties waar de activiteit plaatsgevonden heeft.",
+          "items": {
+            "type": "string",
+            "description": "De locatie (stad, dorp, ...) waar de activiteit plaatsvond"
+          }
+        },
+        "datum": {
+          "type": "string",
+          "format": "date",
+          "description": "Datum waarop activiteit plaatsvindt."
+        },
+        "gps": {
+          "type": "object",
+          "description": "GPS coordinaten voor de locatie",
+          "properties": {
+            "latitude": {
+              "type": "number"
+            },
+            "longitude": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "PodiumVoorstelling": {
+      "type": "object",
+      "description": "Een fiche voor een podiumvoorstelling",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "de ID van een podiumvoorstelling"
+        },
+        "productie": {
+          "$ref": "#/definitions/PodiumProductie"
+        },
+        "ruimtes": {
+          "type": "array",
+          "description": "De ruimtes waar de activiteit plaatsgevonden heeft",
+          "items": {
+            "type": "string",
+            "description": "De ruimte (organisatie, venue, ...) waar dit plaatsvond"
+          }
+        },
+        "locaties": {
+          "type": "array",
+          "description": "De (fysieke) locaties waar de activiteit plaatsgevonden heeft.",
+          "items": {
+            "type": "string",
+            "description": "De locatie (stad, dorp, ...) waar de activiteit plaatsvond"
+          }
+        },
+        "datum": {
+          "type": "string",
+          "format": "date",
+          "description": "Datum waarop activiteit plaatsvindt."
+        }
+      }
+    },
+    "MuziekreleasesItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "De Id van een release"
+        },
+        "titel": {
+          "type": "string",
+          "description": "De titel van de release"
+        },
+        "artiesten": {
+          "type": "array",
+          "description": "de lijst van de main artists",
+          "items": {
+            "type": "object",
+            "properties": {
+              "naam": {
+                "type": "string",
+                "description": "De fullnaam van de main artist van een release"
+              },
+              "context": {
+                "type": "string",
+                "description": "De gelinkte context van main artist van een release"
+              }
+            }
+          }
+        }
+      }
+    },
+    "Muziekrelease": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unieke identifier van een release."
+        },
+        "artiesten": {
+          "type": "array",
+          "description": "de lijst van de main artists",
+          "items": {
+            "type": "object",
+            "properties": {
+              "naam": {
+                "type": "string",
+                "description": "De fullnaam van de main artist van een release"
+              },
+              "id": {
+                "type": "integer",
+                "description": "De ID van de main artist, enkel als die een KSP/FAI kanaal heeft"
+              },
+              "context": {
+                "type": "string",
+                "description": "De gelinkte context van main artist van een release"
+              }
+            }
+          }
+        },
+        "beeldmateriaal": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Bestandsnamen van beelden, pad naar object valt buiten API."
+          }
+        },
+        "toonnaam": {
+          "type": "string",
+          "description": "Toonbare tekst voor een release, bv. de titel."
+        },
+        "versie_info": {
+          "type": "string",
+          "description": "Versie informatie."
+        },
+        "ondertitel": {
+          "type": "string",
+          "description": "Eventuele ondertitel."
+        },
+        "drager_formaat": {
+          "type": "string",
+          "description": "Informatie over het formaat van de drager, bv. vinyl."
+        },
+        "drager_concept": {
+          "type": "string",
+          "description": "Informatie over het concept achter de drager, bv. LP."
+        },
+        "catalogus_nummer": {
+          "type": "string",
+          "description": "Positie in catalogus"
+        },
+        "release_datum": {
+          "type": "string",
+          "format": "date",
+          "description": "Datum van de release."
+        },
+        "land": {
+          "type": "string",
+          "description": "Land waar de release is uitgebracht."
+        },
+        "beschrijving_nl": {
+          "type": "string",
+          "description": "Nederlandstalige beschrijving"
+        },
+        "beschrijving_en": {
+          "type": "string",
+          "description": "Engelstalige beschrijving"
+        },
+        "officiele_perstekst_nl": {
+          "type": "string",
+          "description": "Nederlandstalige perstekst"
+        },
+        "officiele_perstekst_en": {
+          "type": "string",
+          "description": "Engelstalige perstekst"
+        },
+        "tracks": {
+          "$ref": "#/definitions/Release_tracks"
+        }
+      }
+    },
+    "Release_tracks_lijst": {
+      "properties": {
+        "nummer": {
+          "type": "string",
+          "description": "Nummer op de CD."
+        },
+        "titel": {
+          "type": "string",
+          "description": "Titel van de track."
+        },
+        "hoofdartiesten": {
+          "type": "array",
+          "description": "De 'main artists' van die track, maar enkel als de volledige lijst van de main artists track verschilt (niet qua volgorde) van de volledige lijst 'main artists' van de release.",
+          "items": {
+            "type": "object",
+            "description": "Een main artist met zijn ID.",
+            "properties": {
+              "toonnaam": {
+                "type": "string"
+              },
+              "id": {
+                "type": "integer",
+                "description": "De id van de main artist, maar enkel als die een KSP/FAI kanaal heeft"
+              }
+            }
+          }
+        },
+        "versie_info": {
+          "type": "string",
+          "description": "Versie informatie over de track."
+        }
+      }
+    },
+    "Release_tracks": {
+      "properties": {
+        "lijst": {
+          "type": "array",
+          "description": "De tracklijst op de release.",
+          "items": {
+            "$ref": "#/definitions/Release_tracks_lijst"
+          }
+        },
+        "plat": {
+          "type": "string",
+          "description": "Platte tekst representatie van tracklijst"
+        }
+      }
+    },
+    "BuitenlandseConcertenItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "De ID van een buitenlands concert"
+        },
+        "titel": {
+          "type": "string",
+          "description": "De titel van een buitenlands concert"
+        },
+        "artiesten": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "De main artist die aan het buitenlands concert hangt"
+          }
+        },
+        "datum": {
+          "type": "string",
+          "format": "date",
+          "description": "De datum waarop het buitenlands concert plaatsvindt"
+        },
+        "venue": {
+          "type": "string",
+          "description": "De naam van de venue"
+        },
+        "location": {
+          "type": "string",
+          "description": "De naam van de stad en het land van de location die aan de venue van het buitenlands concert hangt"
+        },
+        "gps": {
+          "type": "object",
+          "description": "GPS coordinaten voor de locatie",
+          "properties": {
+            "latitude": {
+              "type": "number"
+            },
+            "longitude": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "BuitenlandsConcert": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "de ID van een buitenlands concert"
+        },
+        "titel": {
+          "type": "string",
+          "description": "De titel van een buitenlands concert"
+        },
+        "artiesten": {
+          "type": "array",
+          "description": "De main artiesten bij een buitenlands concert",
+          "items": {
+            "type": "object",
+            "properties": {
+              "artiest_id": {
+                "type": "integer",
+                "description": "De ID van de main artist (als deze main artist een KSP/FAI kanaal heeft)"
+              },
+              "artiest_naam": {
+                "type": "string",
+                "description": "De naam van de main artist"
+              }
+            }
+          }
+        },
+        "venue": {
+          "type": "string",
+          "description": "De naam van de venue bij een buitenlands concert"
+        },
+        "locatie": {
+          "type": "string",
+          "description": "Land en stad van de venue"
+        },
+        "beschrijving_nl": {
+          "type": "string",
+          "description": "Een vrije tekstveld waarin een omschrijving in het nederlands kan"
+        },
+        "beschrijving_en": {
+          "type": "string",
+          "description": "Een vrije tekstveld waarin een omschrijving in het engels kan"
+        },
+        "datum": {
+          "type": "string",
+          "format": "date",
+          "description": "De datum waarop het buitenlands concert plaatsvindt"
+        }
+      }
+    },
+    "Fout": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

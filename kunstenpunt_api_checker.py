@@ -5,6 +5,7 @@ from codecs import open
 from os import remove
 from glob import glob
 from pystache import render
+from jsonschema import validate, Draft3Validator
 
 
 def render_template(template_loc, response_loc):
@@ -13,16 +14,38 @@ def render_template(template_loc, response_loc):
             template = f.read()
         with open(response, "r", "utf-8") as f:
             content = load(f)
-            pagename = response.split("\\")[-1].rstrip(".json")
+            pagename = response.split("\\")[-1].split(".")[0]
         with open("rendered_pages/" + pagename + ".html", "w", "utf-8") as f:
             f.write(render(template, content))
 
 
-# assuming 10to1 will do tests to validate api output against swagger defined json schema,
-# TODO it turns out they don't...
-# these are "semantic" tests to see if output corresponds to what we expect
+def validate_received_responses(schema_loc, response_loc, array=False):
+    # assuming 10to1 will do tests to validate api output against swagger defined json schema,
+    # TODO it turns out they don't, so I'll do it myself
+    for response in glob(response_loc):
+        test_name = response.split("\\")[-1].split(".")[0]
+        with open(response, "r", "utf-8") as f:
+            v = Draft3Validator(definitions[schema_loc])
+            full_doc = load(f)
+            if array:
+                doc = full_doc[0] if len(full_doc) > 0 else {}
+            else:
+                doc = full_doc
+            validation_errors = sorted(v.iter_errors(doc), key=str)
+            filtered_errors = []
+            for error in validation_errors:
+                if "None is not of type" not in error.message:
+                    filtered_errors.append(str(error))
+            if len(filtered_errors) > 0:
+                with open("validation_errors/" + test_name + ".txt", "w", "utf-8") as f:
+                    f.write("\n\n--------------------------------------\n\n".join([error for error in filtered_errors]))
+
 
 base_path = "http://web01.kunsten-staging.skyscrape.rs/api"
+
+with open("expected_responses/swagger.json") as f:
+    swagger_json = load(f)
+    definitions = swagger_json["definitions"]
 
 tests = {
     "organiteiten": "/organiteiten?offset=0&limit=1",  # lijst van organiteiten
@@ -77,6 +100,9 @@ for f in glob("diffs/*"):
 for f in glob("rendered_pages/*"):
     remove(f)
 
+for f in glob("validation_errors/*"):
+    remove(f)
+
 diffs = {}
 for test in tests:
     try:
@@ -97,31 +123,41 @@ for test in diffs:
         f.write(diffs[test])
 
 # Organiteit
+validate_received_responses("Organiteit", "received_responses/organiteit_*.json")
 render_template("mustache/organiteit.mstch", "received_responses/organiteit_*.json")
 
 # Organiteiten
+validate_received_responses("OrganiteitenItem", "received_responses/organiteiten_*.json", array=True)
 render_template("mustache/organiteiten.mstch", "received_responses/organiteiten_*.json")
 
 # Tentoonstellling
+validate_received_responses("Tentoonstelling", "received_responses/tentoonstelling_*.json")
 render_template("mustache/tentoonstelling.mstch", "received_responses/tentoonstelling_*.json")
 
 # Tentoonstellingen
+validate_received_responses("TentoonstellingenItem", "received_responses/tentoonstellingen_*.json", array=True)
 render_template("mustache/tentoonstellingen.mstch", "received_responses/tentoonstellingen_*.json")
 
 # Buitenlands concert
+validate_received_responses("BuitenlandsConcert", "received_responses/bc_*.json")
 render_template("mustache/buitenlands_concert.mstch", "received_responses/bc_*.json")
 
 # Buitenlandse concerten
+validate_received_responses("BuitenlandseConcertenItem", "received_responses/bcs_*.json", array=True)
 render_template("mustache/buitenlandse_concerten.mstch", "received_responses/bcs_*.json")
 
 # Podiumproductie
+validate_received_responses("PodiumProductie", "received_responses/podiumproductie_.json")
 render_template("mustache/podiumproductie.mstch", "received_responses/podiumproductie_*.json")
 
 # Podiumproducties
+validate_received_responses("PodiumProductiesItem", "received_responses/podiumproducties_*.json", array=True)
 render_template("mustache/podiumproducties.mstch", "received_responses/podiumproducties_*.json")
 
 # Podiumvoorstelling
+validate_received_responses("PodiumVoorstelling", "recevied_responses/podiumvoorstelling_*.json")
 render_template("mustache/podiumvoorstelling.mstch", "received_responses/podiumvoorstelling_*.json")
 
 # Podiumvoorstellingen
+validate_received_responses("PodiumVoorstellingenItem", "received_responses/podiumvoorstellingen_*.json", array=True)
 render_template("mustache/podiumvoorstellingen.mstch", "received_responses/podiumvoorstellingen_*.json")
