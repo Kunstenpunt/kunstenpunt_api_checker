@@ -43,7 +43,7 @@ def validate_received_responses(schema_loc, response_loc, array=False):
 
 base_path = "http://web01.kunsten-staging.skyscrape.rs/api"
 
-with open("expected_responses/swagger.json") as f:
+with open("swagger.json") as f:
     swagger_json = load(f)
     definitions = swagger_json["definitions"]
 
@@ -67,8 +67,10 @@ tests = {
     "tentoonstelling_": "/tentoonstellingen/20462656",  # specifieke tentoonstelling
     "recent_gewijzigde_activiteiten": "/recent_gewijzigde_activiteiten",
     "recent_gewijzigde_buitenlandse_concerten": "/recent_gewijzigde_activiteiten/concert",
+    "recent_gewijzigde_muziekreleases": "/recent_gewijzigde_activiteiten/muziekrelease",
     "binnenkort": "/binnenkort",
     "binnenkort_podiumproducties": "/binnenkort/podiumproductie",
+    "binnenkort_muziekreleases": "/binnenkort/muziekrelease",
     "tien_jaar_geleden": "/tien_jaar_geleden",
     "bcs_": "/buitenlandse_concerten?offset=0&limit=3",  # lijst van buitenlandse concerten
     "bcs_in_jaar": "/buitenlandse_concerten?jaar=2016&offset=0&limit=5",
@@ -88,22 +90,20 @@ tests = {
     "podiumproducties_in_seizoen_van_jan_decleir": "/podiumproducties?seizoen_id=1712&organiteit_id=211878826&offset=0&limit=3",
     "podiumproductie_welwillenden": "/podiumproducties/20452507",
     "podiumvoorstelling_": "/podiumvoorstellingen/261990147",
-    "podiumvoorstellingen_in_seizoen": "/podiumvoorstellingen?seizoen_id=1712&offset=0&limit=3"
+    "podiumvoorstellingen_in_seizoen": "/podiumvoorstellingen?seizoen_id=1712&offset=0&limit=3",
+    "muziekrelease_pop": "/muziekreleases/1586517",
+    "muziekrelease_klassiek": "/muziekreleases/1582773",
+    "muziekreleases_blues": "/muziekreleases?genre_id=18196&offset=0&limit=3",
+    "muziekreleases_2015": "/muziekreleases?jaar=2015&offset=0&limit=3",
+    "muziekreleases_sukilove": "/muziekreleases?organiteit_id=11132341&offset=0&limit=3",
+    "muziekreleases_muziekcentrum": "/muziekreleases?organiteit_id=1214215&offset=0&limit=3",
+    "muziekreleases_pop_maart2015": "/muziekreleases?from_date=2015-03-01&until_date=2015-03-31&genre_id=18196"
 }
 
-for f in glob("received_responses/*"):
-    remove(f)
+for folder in ["received_responses", "rendered_pages", "validation_errors"]:
+    for f in glob(folder + "/*"):
+        remove(f)
 
-for f in glob("diffs/*"):
-    remove(f)
-
-for f in glob("rendered_pages/*"):
-    remove(f)
-
-for f in glob("validation_errors/*"):
-    remove(f)
-
-diffs = {}
 for test in tests:
     try:
         response_text = get(base_path + tests[test]).text
@@ -114,13 +114,6 @@ for test in tests:
     except decoder.JSONDecodeError:
         response = None
         print(test, "".join(["."]*(60 - len(test))), "no response")
-    with open("expected_responses/" + test + ".json", "r", "utf-8") as f:
-        expected = load(f)
-    diffs[test] = diff(response, expected, dump=True)
-
-for test in diffs:
-    with open("diffs/" + test + ".json", "w", "utf-8") as f:
-        f.write(diffs[test])
 
 # Organiteit
 validate_received_responses("Organiteit", "received_responses/organiteit_*.json")
@@ -161,3 +154,11 @@ render_template("mustache/podiumvoorstelling.mstch", "received_responses/podiumv
 # Podiumvoorstellingen
 validate_received_responses("PodiumVoorstellingenItem", "received_responses/podiumvoorstellingen_*.json", array=True)
 render_template("mustache/podiumvoorstellingen.mstch", "received_responses/podiumvoorstellingen_*.json")
+
+# Muziekrelease
+validate_received_responses("Muziekrelease", "received_responses/muziekrelease_*.json")
+render_template("mustache/muziekrelease.mstch", "received_responses/muziekrelease_*.json")
+
+# Muziekreleases
+validate_received_responses("MuziekreleasesItem", "received_responses/muziekreleases_*.json", array=True)
+render_template("mustache/muziekreleases.msstch", "received_responses/muziekreleases_*.json")
