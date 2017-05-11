@@ -10,6 +10,7 @@ from jsonschema import validate, Draft3Validator
 
 def render_template(template_loc, response_loc):
     for response in glob(response_loc):
+        print(response)
         with open(template_loc, "r", "utf-8") as f:
             template = f.read()
         with open(response, "r", "utf-8") as f:
@@ -161,4 +162,12 @@ render_template("mustache/muziekrelease.mstch", "received_responses/muziekreleas
 
 # Muziekreleases
 validate_received_responses("MuziekreleasesItem", "received_responses/muziekreleases_*.json", array=True)
-render_template("mustache/muziekreleases.msstch", "received_responses/muziekreleases_*.json")
+render_template("mustache/muziekreleases.mstch", "received_responses/muziekreleases_*.json")
+
+# Tien jaar geleden
+validate_received_responses("KorteLijstActiviteitenItem", "received_responses/tien_jaar_geleden*.json", array=True)
+render_template("mustache/tienjaargeleden.mstch", "received_responses/tien_jaar_geleden*.json")
+
+# Binnenkort
+validate_received_responses("KorteLijstActiviteitenItem", "received_responses/binnenkort*.json", array=True)
+render_template("mustache/binnenkort.mstch", "received_responses/binnenkort*.json")
