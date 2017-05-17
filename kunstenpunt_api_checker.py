@@ -6,25 +6,27 @@ from os import remove
 from glob import glob
 from pystache import render
 from jsonschema import validate, Draft3Validator
+from os.path import basename, splitext, isfile
 
 
 def render_template(template_loc, response_loc):
-    for response in glob(response_loc):
-        print(response)
-        with open(template_loc, "r", "utf-8") as f:
-            template = f.read()
-        with open(response, "r", "utf-8") as f:
-            content = load(f)
-            pagename = response.split("\\")[-1].split(".")[0]
-        with open("rendered_pages/" + pagename + ".html", "w", "utf-8") as f:
-            f.write(render(template, content))
+    if isfile(template_loc):
+        for response in glob(response_loc):
+            print(response)
+            with open(template_loc, "r", "utf-8") as f:
+                template = f.read()
+            with open(response, "r", "utf-8") as f:
+                content = load(f)
+                pagename = splitext(basename(response))[0]
+            with open("rendered_pages/" + pagename + ".html", "w", "utf-8") as f:
+                f.write(render(template, content))
 
 
 def validate_received_responses(schema_loc, response_loc, array=False):
     # assuming 10to1 will do tests to validate api output against swagger defined json schema,
     # TODO it turns out they don't, so I'll do it myself
     for response in glob(response_loc):
-        test_name = response.split("\\")[-1].split(".")[0]
+        test_name = splitext(basename(response))[0]
         with open(response, "r", "utf-8") as f:
             v = Draft3Validator(definitions[schema_loc])
             full_doc = load(f)

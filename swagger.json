@@ -1327,7 +1327,7 @@
           }
         },
         "beginjaar": {
-          "type": "string",
+          "type": "integer",
           "description": "Beginjaar waarin de activiteit plaatsvindt"
         },
         "tentoonstellingstype": {
